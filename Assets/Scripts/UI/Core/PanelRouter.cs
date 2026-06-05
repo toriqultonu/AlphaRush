@@ -1,78 +1,53 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
-// Minimal panel switcher. Wire each named panel root in inspector.
-//   PanelRouter.Show("Home");
-//   PanelRouter.Show("Game", new GameOpenArgs { topicId = "animals", levelId = 3 });
-// Screens with a typed Open(args) method receive args via the dispatcher below.
+// Inspector-wired panel switcher. Parallel arrays: mainPanels[i] is shown when
+// Show(panelNames[i]) is called; all others are hidden. Registers itself to
+// ServiceLocator.Router in Awake — call via ServiceLocator.Router.Show(Routes.X).
+//
+// Args-style navigation (passing state through Show) is intentionally not
+// supported. Callers that need to seed a view (e.g. GameView.Open(topicId,
+// levelId)) should resolve the target view directly with FindAnyObjectByType,
+// then invoke its typed Open() before/after Show.
 public class PanelRouter : MonoBehaviour {
-    static PanelRouter instance;
-    static object pendingArgs;
+    [SerializeField] GameObject[] mainPanels;
+    [SerializeField] string[] panelNames;
 
-    [Serializable] public struct PanelEntry { public string name; public GameObject root; }
-    [SerializeField] PanelEntry[] panels;
-    [SerializeField] string initialPanel = "Splash";
-
-    Dictionary<string, GameObject> map;
+    public string Current { get; private set; }
+    public event Action<string> OnPanelChanged;
 
     void Awake() {
-        if (instance != null && instance != this) { Destroy(gameObject); return; }
-        instance = this;
-        map = new Dictionary<string, GameObject>();
-        if (panels != null)
-            foreach (var p in panels)
-                if (!string.IsNullOrEmpty(p.name) && p.root != null)
-                    map[p.name] = p.root;
-        foreach (var kv in map) if (kv.Value != null) kv.Value.SetActive(false);
-        if (!string.IsNullOrEmpty(initialPanel)) SwitchTo(initialPanel);
+        ServiceLocator.Router = this;
     }
 
-    public static void Show(string name, object args = null) {
-        if (instance == null) {
-            Debug.LogWarning($"[PanelRouter] not initialized — Show('{name}') ignored.");
+    void OnDestroy() {
+        if (ServiceLocator.Router == this) ServiceLocator.Router = null;
+    }
+
+    public void Show(string panelName) {
+        if (mainPanels == null || mainPanels.Length == 0) {
+            Debug.LogWarning($"[PanelRouter] mainPanels unset — Show('{panelName}') ignored.");
             return;
         }
-        pendingArgs = args;
-        instance.SwitchTo(name);
-    }
 
-    void SwitchTo(string name) {
-        foreach (var kv in map) if (kv.Value != null) kv.Value.SetActive(false);
-        if (!map.TryGetValue(name, out var go) || go == null) {
-            Debug.LogWarning($"[PanelRouter] panel '{name}' not registered.");
+        int match = -1;
+        if (panelNames != null) {
+            int n = Mathf.Min(mainPanels.Length, panelNames.Length);
+            for (int i = 0; i < n; i++) {
+                if (panelNames[i] == panelName) { match = i; break; }
+            }
+        }
+
+        if (match < 0) {
+            Debug.LogWarning($"[PanelRouter] panel '{panelName}' not registered.");
             return;
         }
-        go.SetActive(true);
-        Dispatch(go);
-    }
 
-    static void Dispatch(GameObject go) {
-        var args = pendingArgs;
-        pendingArgs = null;
-        if (args == null) return;
-
-        switch (args) {
-            case GameOpenArgs ga: {
-                var gv = go.GetComponentInChildren<GameView>(true);
-                if (gv != null) gv.Open(ga.topicId, ga.levelId);
-                break;
-            }
-            case LevelResult lr: {
-                var lc = go.GetComponentInChildren<LevelCompleteView>(true);
-                if (lc != null) lc.Open(lr);
-                break;
-            }
-            case string topicId: {
-                var ls = go.GetComponentInChildren<LevelSelectView>(true);
-                if (ls != null) ls.Open(topicId);
-                break;
-            }
+        for (int i = 0; i < mainPanels.Length; i++) {
+            if (mainPanels[i] != null) mainPanels[i].SetActive(i == match);
         }
-    }
-}
 
-public class GameOpenArgs {
-    public string topicId;
-    public int levelId;
+        Current = panelName;
+        OnPanelChanged?.Invoke(panelName);
+    }
 }

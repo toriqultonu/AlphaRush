@@ -1,12 +1,13 @@
-// Static facade over AppBootstrap-owned services so screen code stays terse:
-//   ServiceLocator.Sound.Play(SoundEvent.FOUND);
-// All getters return null until AppBootstrap.Awake completes — guard with null-conditional.
+// Simple settable-static facade. AppBootstrap populates these in Awake;
+// screen code reads via ServiceLocator.X. All getters return null until
+// AppBootstrap.Awake has run — guard with null-conditional in early callers.
 public static class ServiceLocator {
-    public static SoundManager Sound        => AppBootstrap.Instance != null ? AppBootstrap.Instance.Sound          : null;
-    public static MusicManager Music        => AppBootstrap.Instance != null ? AppBootstrap.Instance.Music          : null;
-    public static ProgressStorage Progress  => AppBootstrap.Instance != null ? AppBootstrap.Instance.Progress       : null;
-    public static SettingsStorage Settings  => AppBootstrap.Instance != null ? AppBootstrap.Instance.SettingsStore  : null;
-    public static GameStateStorage GameState=> AppBootstrap.Instance != null ? AppBootstrap.Instance.GameStateStore : null;
-    public static DailyChallengeStorage Daily=> AppBootstrap.Instance != null ? AppBootstrap.Instance.DailyStore     : null;
-    public static ContentRepository Content => AppBootstrap.Instance != null ? AppBootstrap.Instance.Content        : null;
+    public static SoundManager Sound { get; set; }
+    public static MusicManager Music { get; set; }
+    public static ContentRepository Content { get; set; }
+    public static ProgressStorage Progress { get; set; }
+    public static SettingsStorage Settings { get; set; }
+    public static GameStateStorage GameState { get; set; }
+    public static DailyChallengeStorage Daily { get; set; }
+    public static PanelRouter Router { get; set; }
 }

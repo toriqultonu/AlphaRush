@@ -43,7 +43,8 @@ public class LevelSelectView : MonoBehaviour {
             bool capturedUnlocked = unlocked;
             dot.OnPressed = () => {
                 if (!capturedUnlocked) { ServiceLocator.Sound?.Play(SoundEvent.MISS); return; }
-                PanelRouter.Show("Game", new GameOpenArgs { topicId = topicId, levelId = capturedLevel });
+                ServiceLocator.Router?.Show(Routes.Game);
+                FindAnyObjectByType<GameView>(FindObjectsInactive.Include)?.Open(topicId, capturedLevel);
             };
 
             // Zig-zag: shift every second row +X.
@@ -63,6 +64,6 @@ public class LevelSelectView : MonoBehaviour {
 
     void OnBack() {
         ServiceLocator.Sound?.Play(SoundEvent.BUTTON);
-        PanelRouter.Show("TopicList");
+        ServiceLocator.Router?.Show(Routes.TopicList);
     }
 }

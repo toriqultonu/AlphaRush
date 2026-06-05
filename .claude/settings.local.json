@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep -l -i \"textmesh\\\\|TMP\")",
+      "PowerShell(git *)",
+      "Bash(git *)",
+      "PowerShell($j = Get-Content -Raw -Encoding UTF8 'Assets\\\\StreamingAssets\\\\data\\\\topics.json' | ConvertFrom-Json; \"$\\($j.Count\\) topics\"; $j | ForEach-Object { \"{0,-12} stars={1,-3} words={2} icon={3}\" -f $_.id, $_.unlockStarsRequired, $_.wordPool.Count, $_.icon })"
+    ]
+  }
+}

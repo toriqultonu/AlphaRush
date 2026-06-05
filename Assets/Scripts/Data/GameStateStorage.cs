@@ -14,32 +14,41 @@ public class GameStateStorage {
             cached = new Dictionary<string, SavedGameState>();
             return cached;
         }
-        cached = JsonConvert.DeserializeObject<Dictionary<string, SavedGameState>>(File.ReadAllText(FilePath))
-                 ?? new Dictionary<string, SavedGameState>();
+        try {
+            cached = JsonConvert.DeserializeObject<Dictionary<string, SavedGameState>>(File.ReadAllText(FilePath))
+                     ?? new Dictionary<string, SavedGameState>();
+        } catch (System.Exception ex) {
+            Debug.LogWarning($"[GameStateStorage] Failed to load {FilePath}: {ex.Message}. Returning empty map.");
+            cached = new Dictionary<string, SavedGameState>();
+        }
         return cached;
     }
 
     void Persist() {
-        File.WriteAllText(FilePath, JsonConvert.SerializeObject(cached, Formatting.Indented));
+        try {
+            File.WriteAllText(FilePath, JsonConvert.SerializeObject(cached, Formatting.Indented));
+        } catch (System.Exception ex) {
+            Debug.LogWarning($"[GameStateStorage] Failed to save {FilePath}: {ex.Message}.");
+        }
     }
 
     static string Key(string topicId, int levelId) => $"{topicId}:{levelId}";
 
-    public SavedGameState Get(string topicId, int levelId) {
-        Map().TryGetValue(Key(topicId, levelId), out var s);
-        return s;
-    }
-
-    public bool Has(string topicId, int levelId) => Map().ContainsKey(Key(topicId, levelId));
-
-    public void Put(SavedGameState state) {
+    public void Save(SavedGameState state) {
         Map()[Key(state.topicId, state.levelId)] = state;
         Persist();
     }
 
-    public void Remove(string topicId, int levelId) {
+    public SavedGameState Load(string topicId, int levelId) {
+        Map().TryGetValue(Key(topicId, levelId), out var s);
+        return s;
+    }
+
+    public void Delete(string topicId, int levelId) {
         if (Map().Remove(Key(topicId, levelId))) Persist();
     }
+
+    public bool HasSaved(string topicId, int levelId) => Map().ContainsKey(Key(topicId, levelId));
 
     public void ClearAll() {
         if (File.Exists(FilePath)) File.Delete(FilePath);

@@ -16,20 +16,24 @@ public class ContentRepository {
         return topics.Find(t => t.id == topicId);
     }
 
-    public async Task<Level> GetLevelAsync(string topicId, int levelId) {
+    public Task<List<Level>> GetLevelsAsync(string topicId) {
         if (!levelCache.TryGetValue(topicId, out var levels)) {
             levels = source.GenerateLevels(topicId);
             levelCache[topicId] = levels;
         }
-        await Task.CompletedTask;
+        return Task.FromResult(levels);
+    }
+
+    public async Task<Level> GetLevelAsync(string topicId, int levelId) {
+        var levels = await GetLevelsAsync(topicId);
         return levels.Find(l => l.id == levelId);
     }
 
-    // Deterministically picks `targetWordCount` words from the topic pool using the level seed.
-    public async Task<List<string>> GetWordsForLevelAsync(string topicId, int levelId) {
-        var topic = await GetTopicAsync(topicId);
-        var level = await GetLevelAsync(topicId, levelId);
-        if (topic == null || level == null) return new List<string>();
+    // Deterministically picks `level.targetWordCount` words from the topic pool using level.seed.
+    public async Task<List<string>> GetWordsForLevelAsync(Level level) {
+        if (level == null) return new List<string>();
+        var topic = await GetTopicAsync(level.topicId);
+        if (topic == null) return new List<string>();
 
         var rng = new System.Random((int)(level.seed ^ (level.seed >> 32)));
         var pool = new List<string>(topic.wordPool);

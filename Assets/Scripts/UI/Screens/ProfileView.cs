@@ -45,7 +45,7 @@ public class ProfileView : MonoBehaviour {
 
     void OnBack() {
         ServiceLocator.Sound?.Play(SoundEvent.BUTTON);
-        PanelRouter.Show("Home");
+        ServiceLocator.Router?.Show(Routes.Home);
     }
 
     void OnReset() {

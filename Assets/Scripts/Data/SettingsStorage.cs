@@ -23,13 +23,22 @@ public class SettingsStorage {
             cached = new Settings();
             return cached;
         }
-        cached = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(FilePath)) ?? new Settings();
+        try {
+            cached = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(FilePath)) ?? new Settings();
+        } catch (System.Exception ex) {
+            Debug.LogWarning($"[SettingsStorage] Failed to load {FilePath}: {ex.Message}. Returning defaults.");
+            cached = new Settings();
+        }
         return cached;
     }
 
     public void Save(Settings s) {
         cached = s;
-        File.WriteAllText(FilePath, JsonConvert.SerializeObject(s, Formatting.Indented));
+        try {
+            File.WriteAllText(FilePath, JsonConvert.SerializeObject(s, Formatting.Indented));
+        } catch (System.Exception ex) {
+            Debug.LogWarning($"[SettingsStorage] Failed to save {FilePath}: {ex.Message}.");
+        }
     }
 
     public void ClearAll() {

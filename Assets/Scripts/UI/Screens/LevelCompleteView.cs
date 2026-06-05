@@ -54,17 +54,19 @@ public class LevelCompleteView : MonoBehaviour {
     void OnNext() {
         if (result == null) return;
         ServiceLocator.Sound?.Play(SoundEvent.BUTTON);
-        PanelRouter.Show("Game", new GameOpenArgs { topicId = result.topicId, levelId = result.levelId + 1 });
+        ServiceLocator.Router?.Show(Routes.Game);
+        FindAnyObjectByType<GameView>(FindObjectsInactive.Include)?.Open(result.topicId, result.levelId + 1);
     }
 
     void OnReplay() {
         if (result == null) return;
         ServiceLocator.Sound?.Play(SoundEvent.BUTTON);
-        PanelRouter.Show("Game", new GameOpenArgs { topicId = result.topicId, levelId = result.levelId });
+        ServiceLocator.Router?.Show(Routes.Game);
+        FindAnyObjectByType<GameView>(FindObjectsInactive.Include)?.Open(result.topicId, result.levelId);
     }
 
     void OnTopics() {
         ServiceLocator.Sound?.Play(SoundEvent.BUTTON);
-        PanelRouter.Show("TopicList");
+        ServiceLocator.Router?.Show(Routes.TopicList);
     }
 }

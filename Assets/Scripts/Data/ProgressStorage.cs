@@ -6,23 +6,34 @@ public class ProgressStorage {
     string FilePath => Path.Combine(Application.persistentDataPath, "progress.json");
     PlayerProgress cached;
 
+    static PlayerProgress Defaults() => new PlayerProgress {
+        unlockedTopicIds = new() { "animals", "fruits", "colors", "family" },
+        bestResults = new(),
+        badges = new()
+    };
+
     public PlayerProgress Load() {
         if (cached != null) return cached;
         if (!File.Exists(FilePath)) {
-            cached = new PlayerProgress {
-                unlockedTopicIds = new() { "animals", "fruits", "colors", "family" },
-                bestResults = new(),
-                badges = new()
-            };
+            cached = Defaults();
             return cached;
         }
-        cached = JsonConvert.DeserializeObject<PlayerProgress>(File.ReadAllText(FilePath));
+        try {
+            cached = JsonConvert.DeserializeObject<PlayerProgress>(File.ReadAllText(FilePath)) ?? Defaults();
+        } catch (System.Exception ex) {
+            Debug.LogWarning($"[ProgressStorage] Failed to load {FilePath}: {ex.Message}. Returning defaults.");
+            cached = Defaults();
+        }
         return cached;
     }
 
     public void Save(PlayerProgress p) {
         cached = p;
-        File.WriteAllText(FilePath, JsonConvert.SerializeObject(p, Formatting.Indented));
+        try {
+            File.WriteAllText(FilePath, JsonConvert.SerializeObject(p, Formatting.Indented));
+        } catch (System.Exception ex) {
+            Debug.LogWarning($"[ProgressStorage] Failed to save {FilePath}: {ex.Message}.");
+        }
     }
 
     public void RecordLevelResult(LevelResult r) {

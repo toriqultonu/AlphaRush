@@ -45,9 +45,9 @@ public class GameView : MonoBehaviour {
         var repo = ServiceLocator.Content;
         topic = await repo.GetTopicAsync(topicId);
         level = await repo.GetLevelAsync(topicId, levelId);
-        var words = await repo.GetWordsForLevelAsync(topicId, levelId);
+        var words = await repo.GetWordsForLevelAsync(level);
 
-        var saved = ServiceLocator.GameState?.Get(topicId, levelId);
+        var saved = ServiceLocator.GameState?.Load(topicId, levelId);
         if (saved != null) {
             // TODO: surface ResumeDialog → user chooses resume vs restart. Auto-resume for now.
             LoadFromSaved(saved);
@@ -192,7 +192,7 @@ public class GameView : MonoBehaviour {
     }
 
     public void Restart() {
-        ServiceLocator.GameState?.Remove(topicId, levelId);
+        ServiceLocator.GameState?.Delete(topicId, levelId);
         if (timerLoop != null) StopCoroutine(timerLoop);
         Open(topicId, levelId);
     }
@@ -201,9 +201,9 @@ public class GameView : MonoBehaviour {
         if (timerLoop != null) StopCoroutine(timerLoop);
 
         if (complete) {
-            ServiceLocator.GameState?.Remove(topicId, levelId);
+            ServiceLocator.GameState?.Delete(topicId, levelId);
         } else if (grid != null && placedWords != null) {
-            ServiceLocator.GameState?.Put(BuildSaveBlob());
+            ServiceLocator.GameState?.Save(BuildSaveBlob());
         }
 
         // TODO: PanelRouter.Show("LevelSelect"). For now, deactivate self.
@@ -249,7 +249,7 @@ public class GameView : MonoBehaviour {
             completedAt  = System.DateTimeOffset.Now.ToUnixTimeSeconds()
         };
         ServiceLocator.Progress?.RecordLevelResult(result);
-        ServiceLocator.GameState?.Remove(topicId, levelId);
+        ServiceLocator.GameState?.Delete(topicId, levelId);
 
         ServiceLocator.Sound?.Play(SoundEvent.WIN);
         HapticManager.Win();

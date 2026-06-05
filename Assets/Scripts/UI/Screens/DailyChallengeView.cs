@@ -55,11 +55,12 @@ public class DailyChallengeView : MonoBehaviour {
         if (current == null) return;
         ServiceLocator.Sound?.Play(SoundEvent.BUTTON);
         // Use level id 1 as the playable surface. GameView ignores daily-specific scoring.
-        PanelRouter.Show("Game", new GameOpenArgs { topicId = current.topicId, levelId = 1 });
+        ServiceLocator.Router?.Show(Routes.Game);
+        FindAnyObjectByType<GameView>(FindObjectsInactive.Include)?.Open(current.topicId, 1);
     }
 
     void OnBack() {
         ServiceLocator.Sound?.Play(SoundEvent.BUTTON);
-        PanelRouter.Show("Home");
+        ServiceLocator.Router?.Show(Routes.Home);
     }
 }

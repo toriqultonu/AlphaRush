@@ -3,10 +3,11 @@
     "id": "animals",
     "name": "Animals",
     "icon": "🐾",
-    "accentColor": 4283215696,
+    "accentColor": 4294961979,
     "wordPool": [
-      "CAT", "DOG", "BIRD", "FISH", "LION", "TIGER", "BEAR",
-      "ZEBRA", "HORSE", "MONKEY", "RABBIT", "WOLF", "PANDA", "GIRAFFE"
+      "DOG", "CAT", "LION", "BEAR", "TIGER", "ZEBRA", "MONKEY", "ELEPHANT",
+      "GIRAFFE", "RABBIT", "HORSE", "COW", "GOAT", "FOX", "WOLF", "DEER",
+      "FROG", "DUCK", "OWL", "BIRD"
     ],
     "unlockStarsRequired": 0
   },
@@ -14,12 +15,23 @@
     "id": "fruits",
     "name": "Fruits",
     "icon": "🍎",
-    "accentColor": 4294940672,
+    "accentColor": 4294198070,
     "wordPool": [
-      "APPLE", "MANGO", "GRAPE", "ORANGE", "BANANA",
-      "PEACH", "CHERRY", "LEMON", "MELON", "KIWI", "PEAR", "PLUM"
+      "APPLE", "MANGO", "BANANA", "GRAPE", "ORANGE", "PEACH", "PLUM", "PEAR",
+      "KIWI", "LEMON", "MELON", "CHERRY", "PAPAYA", "GUAVA", "BERRY"
     ],
     "unlockStarsRequired": 0
+  },
+  {
+    "id": "vegetables",
+    "name": "Vegetables",
+    "icon": "🥦",
+    "accentColor": 4283215696,
+    "wordPool": [
+      "CARROT", "POTATO", "ONION", "TOMATO", "GARLIC", "GINGER", "PEPPER",
+      "CABBAGE", "LETTUCE", "SPINACH", "PEAS", "BEAN", "CORN", "OKRA"
+    ],
+    "unlockStarsRequired": 5
   },
   {
     "id": "colors",
@@ -27,21 +39,186 @@
     "icon": "🎨",
     "accentColor": 4284612846,
     "wordPool": [
-      "RED", "BLUE", "GREEN", "YELLOW", "PURPLE",
-      "PINK", "ORANGE", "BLACK", "WHITE", "BROWN", "GRAY", "CYAN"
+      "RED", "BLUE", "GREEN", "YELLOW", "PINK", "BLACK", "WHITE", "ORANGE",
+      "BROWN", "PURPLE", "GRAY", "CYAN"
     ],
     "unlockStarsRequired": 0
+  },
+  {
+    "id": "body",
+    "name": "Body Parts",
+    "icon": "🧍",
+    "accentColor": 4293467747,
+    "wordPool": [
+      "HEAD", "HAND", "FOOT", "NOSE", "EYE", "EAR", "LEG", "ARM", "NECK",
+      "FACE", "KNEE", "LIP", "CHIN", "HAIR", "TOE"
+    ],
+    "unlockStarsRequired": 10
   },
   {
     "id": "family",
     "name": "Family",
     "icon": "👨‍👩‍👧",
-    "accentColor": 4293467747,
+    "accentColor": 4278228616,
     "wordPool": [
-      "MOM", "DAD", "SISTER", "BROTHER", "BABY",
-      "AUNT", "UNCLE", "COUSIN", "GRANDMA", "GRANDPA", "NIECE", "NEPHEW"
+      "MOM", "DAD", "BROTHER", "SISTER", "GRANDMA", "GRANDPA", "UNCLE",
+      "AUNT", "COUSIN", "BABY", "FATHER", "MOTHER"
     ],
     "unlockStarsRequired": 0
+  },
+  {
+    "id": "vehicles",
+    "name": "Vehicles",
+    "icon": "🚗",
+    "accentColor": 4294940672,
+    "wordPool": [
+      "CAR", "BUS", "BIKE", "BOAT", "TRAIN", "PLANE", "SHIP", "TRUCK",
+      "JEEP", "VAN", "TAXI", "SCOOTER", "TRAM"
+    ],
+    "unlockStarsRequired": 15
+  },
+  {
+    "id": "food",
+    "name": "Food",
+    "icon": "🍕",
+    "accentColor": 4283215696,
+    "wordPool": [
+      "RICE", "BREAD", "FISH", "MEAT", "CAKE", "PIZZA", "SOUP", "PASTA",
+      "BURGER", "SALAD", "NOODLE", "EGG"
+    ],
+    "unlockStarsRequired": 20
+  },
+  {
+    "id": "countries",
+    "name": "Countries",
+    "icon": "🌍",
+    "accentColor": 4280391411,
+    "wordPool": [
+      "INDIA", "CHINA", "JAPAN", "EGYPT", "FRANCE", "SPAIN", "ITALY",
+      "BRAZIL", "CANADA", "KENYA", "NEPAL", "PERU"
+    ],
+    "unlockStarsRequired": 25
+  },
+  {
+    "id": "cities",
+    "name": "Cities",
+    "icon": "🏙️",
+    "accentColor": 4280391411,
+    "wordPool": [
+      "TOKYO", "PARIS", "ROME", "LONDON", "CAIRO", "DELHI", "DHAKA",
+      "LAGOS", "LIMA", "MIAMI", "OSAKA", "MADRID"
+    ],
+    "unlockStarsRequired": 30
+  },
+  {
+    "id": "sports",
+    "name": "Sports",
+    "icon": "⚽",
+    "accentColor": 4294940672,
+    "wordPool": [
+      "SOCCER", "TENNIS", "GOLF", "CRICKET", "HOCKEY", "RUGBY", "BASEBALL",
+      "BOXING", "CHESS", "KARATE", "SWIMMING", "RUNNING"
+    ],
+    "unlockStarsRequired": 35
+  },
+  {
+    "id": "school",
+    "name": "School",
+    "icon": "🎒",
+    "accentColor": 4284612846,
+    "wordPool": [
+      "BOOK", "PEN", "PENCIL", "BAG", "RULER", "ERASER", "DESK", "CHAIR",
+      "BOARD", "CLASS", "TEACHER", "STUDENT"
+    ],
+    "unlockStarsRequired": 40
+  },
+  {
+    "id": "weather",
+    "name": "Weather",
+    "icon": "⛅",
+    "accentColor": 4280391411,
+    "wordPool": [
+      "SUN", "RAIN", "SNOW", "WIND", "CLOUD", "STORM", "FOG", "HEAT",
+      "COLD", "ICE", "FROST", "SUNNY"
+    ],
+    "unlockStarsRequired": 45
+  },
+  {
+    "id": "space",
+    "name": "Space",
+    "icon": "🚀",
+    "accentColor": 4284612846,
+    "wordPool": [
+      "MOON", "STAR", "SUN", "EARTH", "MARS", "VENUS", "COMET", "PLANET",
+      "ROCKET", "ORBIT", "GALAXY", "SATURN"
+    ],
+    "unlockStarsRequired": 50
+  },
+  {
+    "id": "ocean",
+    "name": "Ocean",
+    "icon": "🐠",
+    "accentColor": 4278228616,
+    "wordPool": [
+      "FISH", "SHARK", "WHALE", "CORAL", "CRAB", "OCTOPUS", "SHELL",
+      "WAVE", "SEA", "REEF", "EEL", "TUNA"
+    ],
+    "unlockStarsRequired": 60
+  },
+  {
+    "id": "farm",
+    "name": "Farm",
+    "icon": "🚜",
+    "accentColor": 4283215696,
+    "wordPool": [
+      "COW", "HEN", "GOAT", "SHEEP", "HORSE", "PIG", "DUCK", "BARN",
+      "FARMER", "TRACTOR", "CROP", "HAY"
+    ],
+    "unlockStarsRequired": 70
+  },
+  {
+    "id": "clothes",
+    "name": "Clothes",
+    "icon": "👕",
+    "accentColor": 4293467747,
+    "wordPool": [
+      "SHIRT", "PANTS", "HAT", "SOCKS", "SHOES", "COAT", "SCARF", "GLOVES",
+      "DRESS", "SKIRT", "JEANS", "JACKET"
+    ],
+    "unlockStarsRequired": 80
+  },
+  {
+    "id": "instruments",
+    "name": "Instruments",
+    "icon": "🎸",
+    "accentColor": 4294940672,
+    "wordPool": [
+      "DRUM", "GUITAR", "PIANO", "FLUTE", "VIOLIN", "HARP", "TRUMPET",
+      "CELLO", "BANJO", "SAXOPHONE", "OBOE", "TUBA"
+    ],
+    "unlockStarsRequired": 90
+  },
+  {
+    "id": "tools",
+    "name": "Tools",
+    "icon": "🔧",
+    "accentColor": 4294961979,
+    "wordPool": [
+      "HAMMER", "SAW", "NAIL", "DRILL", "WRENCH", "SCREW", "RULER", "TAPE",
+      "KNIFE", "BRUSH", "CHISEL", "AXE"
+    ],
+    "unlockStarsRequired": 100
+  },
+  {
+    "id": "bugs",
+    "name": "Bugs",
+    "icon": "🐞",
+    "accentColor": 4283215696,
+    "wordPool": [
+      "ANT", "BEE", "FLY", "MOTH", "WASP", "BEETLE", "SPIDER", "CRICKET",
+      "LADYBUG", "MOSQUITO", "BUTTERFLY", "DRAGONFLY"
+    ],
+    "unlockStarsRequired": 115
   },
   {
     "id": "shapes",
@@ -49,9 +226,20 @@
     "icon": "🔷",
     "accentColor": 4280391411,
     "wordPool": [
-      "CIRCLE", "SQUARE", "TRIANGLE", "OVAL", "STAR",
-      "HEART", "DIAMOND", "HEXAGON", "RECTANGLE", "ARROW"
+      "CIRCLE", "SQUARE", "TRIANGLE", "OVAL", "STAR", "HEART", "DIAMOND",
+      "HEXAGON", "CUBE", "PENTAGON", "RECTANGLE", "ARROW"
     ],
-    "unlockStarsRequired": 10
+    "unlockStarsRequired": 130
+  },
+  {
+    "id": "numbers",
+    "name": "Numbers",
+    "icon": "🔢",
+    "accentColor": 4284612846,
+    "wordPool": [
+      "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT",
+      "NINE", "TEN", "ELEVEN", "TWELVE"
+    ],
+    "unlockStarsRequired": 150
   }
 ]

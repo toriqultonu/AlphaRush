@@ -34,8 +34,8 @@ public class HomeView : MonoBehaviour {
         streakChip?.Set("Streak", $"{progress.streakDays}d");
     }
 
-    void OnPlay()     { ServiceLocator.Sound?.Play(SoundEvent.BUTTON); PanelRouter.Show("TopicList"); }
-    void OnDaily()    { ServiceLocator.Sound?.Play(SoundEvent.BUTTON); PanelRouter.Show("DailyChallenge"); }
-    void OnProfile()  { ServiceLocator.Sound?.Play(SoundEvent.BUTTON); PanelRouter.Show("Profile"); }
-    void OnSettings() { ServiceLocator.Sound?.Play(SoundEvent.BUTTON); PanelRouter.Show("Settings"); }
+    void OnPlay()     { ServiceLocator.Sound?.Play(SoundEvent.BUTTON); ServiceLocator.Router?.Show(Routes.TopicList); }
+    void OnDaily()    { ServiceLocator.Sound?.Play(SoundEvent.BUTTON); ServiceLocator.Router?.Show(Routes.Daily); }
+    void OnProfile()  { ServiceLocator.Sound?.Play(SoundEvent.BUTTON); ServiceLocator.Router?.Show(Routes.Profile); }
+    void OnSettings() { ServiceLocator.Sound?.Play(SoundEvent.BUTTON); ServiceLocator.Router?.Show(Routes.Settings); }
 }

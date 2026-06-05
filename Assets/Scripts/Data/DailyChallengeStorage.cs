@@ -4,8 +4,9 @@ using UnityEngine;
 
 [System.Serializable]
 public class DailyChallengeBlob {
-    public DailyChallenge current;
-    public int streakDays;
+    public DailyChallenge Current;
+    public int StreakDays;
+    public string LastCompletedDate;
 }
 
 public class DailyChallengeStorage {
@@ -18,35 +19,61 @@ public class DailyChallengeStorage {
             cached = new DailyChallengeBlob();
             return cached;
         }
-        cached = JsonConvert.DeserializeObject<DailyChallengeBlob>(File.ReadAllText(FilePath))
-                 ?? new DailyChallengeBlob();
+        try {
+            cached = JsonConvert.DeserializeObject<DailyChallengeBlob>(File.ReadAllText(FilePath))
+                     ?? new DailyChallengeBlob();
+        } catch (System.Exception ex) {
+            Debug.LogWarning($"[DailyChallengeStorage] Failed to load {FilePath}: {ex.Message}. Returning defaults.");
+            cached = new DailyChallengeBlob();
+        }
         return cached;
     }
 
     public void Save(DailyChallengeBlob blob) {
         cached = blob;
-        File.WriteAllText(FilePath, JsonConvert.SerializeObject(blob, Formatting.Indented));
+        try {
+            File.WriteAllText(FilePath, JsonConvert.SerializeObject(blob, Formatting.Indented));
+        } catch (System.Exception ex) {
+            Debug.LogWarning($"[DailyChallengeStorage] Failed to save {FilePath}: {ex.Message}.");
+        }
     }
 
-    public DailyChallenge GetCurrent() => Load().current;
+    public DailyChallenge GetCurrent() => Load().Current;
 
-    public void SetCurrent(DailyChallenge dc) {
+    public void SetCurrent(DailyChallenge challenge) {
         var b = Load();
-        b.current = dc;
+        b.Current = challenge;
         Save(b);
     }
 
-    public int GetStreak() => Load().streakDays;
+    public int GetStreak() => Load().StreakDays;
 
-    public void IncrementStreak() {
+    // Marks the current challenge complete with `stars`, bumps streak if this is a new day
+    // (or starts at 1 on first completion / after a gap), and records today's date.
+    public void MarkCompleted(int stars) {
         var b = Load();
-        b.streakDays++;
-        Save(b);
-    }
-
-    public void ResetStreak() {
-        var b = Load();
-        b.streakDays = 0;
+        if (b.Current != null) {
+            b.Current.completed = true;
+            b.Current.stars = stars;
+        }
+        string today = System.DateTime.Now.ToString("yyyy-MM-dd");
+        if (!string.IsNullOrEmpty(b.LastCompletedDate)) {
+            if (System.DateTime.TryParse(b.LastCompletedDate, out var prev)) {
+                int daysSince = (System.DateTime.Now.Date - prev.Date).Days;
+                if (daysSince == 0) {
+                    // Already counted today; leave streak as-is.
+                } else if (daysSince == 1) {
+                    b.StreakDays++;
+                } else {
+                    b.StreakDays = 1;
+                }
+            } else {
+                b.StreakDays = 1;
+            }
+        } else {
+            b.StreakDays = 1;
+        }
+        b.LastCompletedDate = today;
         Save(b);
     }
 

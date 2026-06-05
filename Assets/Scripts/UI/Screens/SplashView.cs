@@ -26,6 +26,6 @@ public class SplashView : MonoBehaviour {
         if (canvasGroup != null) canvasGroup.DOFade(0f, 0.3f);
         yield return new WaitForSeconds(0.3f);
 
-        PanelRouter.Show("Home");
+        ServiceLocator.Router?.Show(Routes.Home);
     }
 }

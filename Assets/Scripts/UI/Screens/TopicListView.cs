@@ -39,7 +39,8 @@ public class TopicListView : MonoBehaviour {
                     ServiceLocator.Sound?.Play(SoundEvent.MISS);
                     return;
                 }
-                PanelRouter.Show("LevelSelect", capturedId);
+                ServiceLocator.Router?.Show(Routes.LevelSelect);
+                FindAnyObjectByType<LevelSelectView>(FindObjectsInactive.Include)?.Open(capturedId);
             };
             spawned.Add(card);
         }
@@ -61,6 +62,6 @@ public class TopicListView : MonoBehaviour {
 
     void OnBack() {
         ServiceLocator.Sound?.Play(SoundEvent.BUTTON);
-        PanelRouter.Show("Home");
+        ServiceLocator.Router?.Show(Routes.Home);
     }
 }
