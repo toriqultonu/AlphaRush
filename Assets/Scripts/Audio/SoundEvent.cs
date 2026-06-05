@@ -1,4 +1,0 @@
-public enum SoundEvent {
-    TAP, SELECT, FOUND, COMBO, MISS, HINT, PAUSE,
-    STAR_POP, WIN, LOSE, UNLOCK, BUTTON
-}
