@@ -18,19 +18,25 @@ public class GameGridView : MonoBehaviour, IPointerDownHandler, IDragHandler, IP
 
     public void Build(char[,] chars) {
         size = chars.GetLength(0);
-        // Compute cell size from rect
+        // Compute cell size from rect. Force a layout pass first — Build is often
+        // called the same frame the panel is activated, before layout has run.
         var rt = (RectTransform)transform;
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        Canvas.ForceUpdateCanvases();
         float minSide = Mathf.Min(rt.rect.width, rt.rect.height) - 16f;
+        if (minSide <= 0f) minSide = 900f; // safe fallback before first layout pass
         grid.cellSize = new Vector2(minSide / size, minSide / size);
         grid.constraintCount = size;
 
         foreach (Transform c in grid.transform) Destroy(c.gameObject);
         tiles = new TileView[size, size];
+        bool reduceMotion = ServiceLocator.Settings?.Load()?.reduceMotion ?? false;
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++) {
                 var t = Instantiate(tilePrefab, grid.transform);
                 t.Set(chars[r, c], r, c);
                 tiles[r, c] = t;
+                if (!reduceMotion) t.PlaySpawn((r + c) * 0.022f);
             }
     }
 

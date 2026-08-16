@@ -1,12 +1,16 @@
 using UnityEngine;
 using TMPro;
 
-// Stub. Real impl renders mm:ss + warning color when remaining < 10s.
+// Count-up stopwatch (no time limit). Tint shifts once the 3-star window
+// (half the difficulty budget) has passed, as a gentle "hurry for stars" cue.
 public class TimerView : MonoBehaviour {
     [SerializeField] TMP_Text label;
 
     public virtual void SetTime(int elapsedSec, int budgetSec) {
-        int remaining = Mathf.Max(0, budgetSec - elapsedSec);
-        if (label != null) label.text = $"{remaining / 60:00}:{remaining % 60:00}";
+        if (label == null) return;
+        label.text = $"{elapsedSec / 60:00}:{elapsedSec % 60:00}";
+        label.color = (budgetSec > 0 && elapsedSec > budgetSec / 2)
+            ? AppColors.CandyPinkDeep
+            : AppColors.LetterBrown;
     }
 }

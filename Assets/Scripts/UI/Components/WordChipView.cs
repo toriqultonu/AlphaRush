@@ -10,15 +10,18 @@ public class WordChipView : MonoBehaviour {
     public string Word { get; private set; }
     bool found;
 
-    public void Bind(string word) {
+    public void Bind(string word) => Bind(word, AppColors.CardBackground);
+
+    // Candy-pill variant — WordListView cycles AppColors.ChipColors (demo style).
+    public void Bind(string word, Color pillColor) {
         Word = word;
         found = false;
         if (label != null) {
             label.text = word;
             label.alpha = 1f;
-            label.fontStyle = FontStyles.Normal;
+            label.fontStyle = FontStyles.Bold;
         }
-        if (background != null) background.color = AppColors.CardBackground;
+        if (background != null) background.color = pillColor;
         transform.localScale = Vector3.one;
     }
 

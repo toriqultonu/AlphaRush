@@ -11,7 +11,7 @@ public class ComboBannerView : MonoBehaviour {
         if (banner == null || bannerText == null) return;
         banner.SetActive(true);
         bannerText.text = $"COMBO x{level}!";
-        bannerText.color = level >= 5 ? Color.red : Color.yellow;
+        bannerText.color = level >= 5 ? AppColors.StarGold : Color.white;
         var rt = bannerText.rectTransform;
         rt.localScale = Vector3.zero;
         rt.DOScale(1.15f, 0.18f).SetEase(Ease.OutBack)

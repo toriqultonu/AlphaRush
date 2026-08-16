@@ -12,7 +12,12 @@ public class GameView : MonoBehaviour {
     [SerializeField] Button hintBtn, restartBtn, pauseBtn, backBtn;
     [SerializeField] ComboBannerView comboBanner;
     [SerializeField] GameObject layoutPortrait, layoutLandscape;
-    [SerializeField] GameObject pauseDialog, resumeDialog;
+    [SerializeField] PauseDialog pauseDialog;
+    [SerializeField] ResumeDialog resumeDialog;
+    [SerializeField] TutorialOverlay tutorial;
+
+    // Set by DailyChallengeView right before Open() so Complete() can credit the streak.
+    public static bool NextOpenIsDaily;
 
     string topicId; int levelId;
     Topic topic; Level level;
@@ -20,15 +25,21 @@ public class GameView : MonoBehaviour {
     List<FoundWord> foundWords = new();
     char[,] grid;
     int elapsedSec, hintsUsed, colorIndex;
-    bool paused, complete;
+    bool paused, complete, isDailyRun;
     ComboTracker combo = new(AppConfig.ComboWindowMs);
     Coroutine timerLoop;
+    long? pendingShuffleSeed; // set by Restart — re-places words with a fresh layout
 
     void OnEnable() {
         if (hintBtn != null) hintBtn.onClick.AddListener(UseHint);
         if (restartBtn != null) restartBtn.onClick.AddListener(Restart);
         if (pauseBtn != null) pauseBtn.onClick.AddListener(Pause);
         if (backBtn != null) backBtn.onClick.AddListener(SaveAndQuit);
+        if (pauseDialog != null) {
+            pauseDialog.OnResume  = ClosePauseDialog;
+            pauseDialog.OnRestart = () => { ClosePauseDialog(); Restart(); };
+            pauseDialog.OnQuit    = () => { ClosePauseDialog(); SaveAndQuit(); };
+        }
     }
 
     void OnDisable() {
@@ -41,21 +52,41 @@ public class GameView : MonoBehaviour {
     public async void Open(string topicId, int levelId) {
         this.topicId = topicId;
         this.levelId = levelId;
+        isDailyRun = NextOpenIsDaily;
+        NextOpenIsDaily = false;
 
         var repo = ServiceLocator.Content;
         topic = await repo.GetTopicAsync(topicId);
         level = await repo.GetLevelAsync(topicId, levelId);
         var words = await repo.GetWordsForLevelAsync(level);
 
+        if (headerTopic != null) headerTopic.text = topic?.name ?? topicId;
+
         var saved = ServiceLocator.GameState?.Load(topicId, levelId);
-        if (saved != null) {
-            // TODO: surface ResumeDialog → user chooses resume vs restart. Auto-resume for now.
-            LoadFromSaved(saved);
-        } else {
-            GenerateFreshGrid(words);
+        if (saved != null && resumeDialog != null) {
+            // Let the player choose before anything starts ticking.
+            resumeDialog.OnResume = () => {
+                resumeDialog.gameObject.SetActive(false);
+                LoadFromSaved(saved);
+                BeginRound();
+            };
+            resumeDialog.OnRestart = () => {
+                resumeDialog.gameObject.SetActive(false);
+                ServiceLocator.GameState?.Delete(topicId, levelId);
+                pendingShuffleSeed = NewShuffleSeed();
+                GenerateFreshGrid(words);
+                BeginRound();
+            };
+            resumeDialog.gameObject.SetActive(true);
+            return;
         }
 
-        if (headerTopic != null) headerTopic.text = topic?.name ?? topicId;
+        if (saved != null) LoadFromSaved(saved);
+        else GenerateFreshGrid(words);
+        BeginRound();
+    }
+
+    void BeginRound() {
         gridView.OnSelectionComplete = OnSelectionEnd;
         gridView.Build(grid);
 
@@ -68,15 +99,34 @@ public class GameView : MonoBehaviour {
         complete = false; paused = false;
         if (timerLoop != null) StopCoroutine(timerLoop);
         timerLoop = StartCoroutine(TickTimer());
+
+        // First-launch tutorial (spec §16.3 — fires once).
+        var settings = ServiceLocator.Settings?.Load();
+        if (settings != null && !settings.tutorialShown && tutorial != null) {
+            paused = true;
+            tutorial.OnFinished = () => {
+                settings.tutorialShown = true;
+                ServiceLocator.Settings?.Save(settings);
+                paused = false;
+            };
+            tutorial.Show();
+        }
     }
 
     void GenerateFreshGrid(List<string> words) {
-        var res = GridGenerator.Generate(level.difficulty.GridSize(), words, level.difficulty, level.seed);
+        // First play of a level uses the deterministic seed (acceptance #4);
+        // Restart shuffles with a one-shot random seed and resets the clock.
+        long seed = pendingShuffleSeed ?? level.seed;
+        pendingShuffleSeed = null;
+        var res = GridGenerator.Generate(level.difficulty.GridSize(), words, level.difficulty, seed);
         grid = res.Grid;
         placedWords = res.Placed;
         foundWords = new List<FoundWord>();
         elapsedSec = 0; hintsUsed = 0; colorIndex = 0;
     }
+
+    static long NewShuffleSeed() =>
+        System.DateTime.Now.Ticks ^ (System.Environment.TickCount << 16);
 
     void LoadFromSaved(SavedGameState s) {
         int size = s.gridRows.Length;
@@ -141,9 +191,11 @@ public class GameView : MonoBehaviour {
 
     void UpdateProgress() {
         if (progressLine == null) return;
-        progressLine.text = $"{foundWords.Count} / {placedWords.Count}";
+        progressLine.text = $"FOUND: {foundWords.Count} / {placedWords.Count}";
     }
 
+    // Counts UP with no limit — the game can't be lost to the clock. Elapsed
+    // time only decides stars on completion (fast = 3★, slower = fewer).
     IEnumerator TickTimer() {
         var wait = new WaitForSeconds(1f);
         int budget = level.difficulty.TimeBonusSec();
@@ -153,18 +205,15 @@ public class GameView : MonoBehaviour {
             if (paused || complete) continue;
             elapsedSec++;
             timer?.SetTime(elapsedSec, budget);
-            if (elapsedSec >= budget) {
-                OnTimeUp();
-                yield break;
-            }
         }
     }
 
-    void OnTimeUp() {
-        complete = true;
-        ServiceLocator.Sound?.Play(SoundEvent.LOSE);
-        HapticManager.Lose();
-        // TODO: open LevelComplete in failure state (zero stars) via PanelRouter.
+    // Backing out to Android home / app switch: freeze the clock and persist
+    // the board so a returning player continues exactly where they left off.
+    void OnApplicationPause(bool pausedByOS) {
+        if (!pausedByOS || complete || grid == null || placedWords == null) return;
+        if (!gameObject.activeInHierarchy) return;
+        ServiceLocator.GameState?.Save(BuildSaveBlob());
     }
 
     public void UseHint() {
@@ -181,19 +230,22 @@ public class GameView : MonoBehaviour {
 
     public void Pause() {
         if (complete) return;
-        paused = !paused;
-        if (paused) {
-            ServiceLocator.Sound?.Play(SoundEvent.PAUSE);
-            HapticManager.Tick();
-            if (pauseDialog != null) pauseDialog.SetActive(true);
-        } else {
-            if (pauseDialog != null) pauseDialog.SetActive(false);
-        }
+        paused = true;
+        ServiceLocator.Sound?.Play(SoundEvent.PAUSE);
+        HapticManager.Tick();
+        if (pauseDialog != null) pauseDialog.gameObject.SetActive(true);
     }
 
+    void ClosePauseDialog() {
+        if (pauseDialog != null) pauseDialog.gameObject.SetActive(false);
+        paused = false;
+    }
+
+    // Restart = shuffle: same words, brand-new random layout, timer back to 0.
     public void Restart() {
         ServiceLocator.GameState?.Delete(topicId, levelId);
         if (timerLoop != null) StopCoroutine(timerLoop);
+        pendingShuffleSeed = NewShuffleSeed();
         Open(topicId, levelId);
     }
 
@@ -206,8 +258,7 @@ public class GameView : MonoBehaviour {
             ServiceLocator.GameState?.Save(BuildSaveBlob());
         }
 
-        // TODO: PanelRouter.Show("LevelSelect"). For now, deactivate self.
-        gameObject.SetActive(false);
+        ServiceLocator.Router?.Show(isDailyRun ? Routes.Home : Routes.LevelSelect);
     }
 
     SavedGameState BuildSaveBlob() {
@@ -248,12 +299,31 @@ public class GameView : MonoBehaviour {
             hintsUsed    = hintsUsed,
             completedAt  = System.DateTimeOffset.Now.ToUnixTimeSeconds()
         };
+
+        // High-score check BEFORE recording — beat the stored best on stars,
+        // or match stars with a faster time, and the sheet celebrates it.
+        bool isNewBest = true;
+        var progress = ServiceLocator.Progress?.Load();
+        if (progress?.bestResults != null &&
+            progress.bestResults.TryGetValue($"{topicId}:{levelId}", out var prev) && prev != null) {
+            isNewBest = stars > prev.stars ||
+                        (stars == prev.stars && elapsedSec < prev.timeSeconds);
+        }
+
         ServiceLocator.Progress?.RecordLevelResult(result);
         ServiceLocator.GameState?.Delete(topicId, levelId);
 
+        if (isDailyRun) {
+            ServiceLocator.Daily?.MarkCompleted(stars);
+            isDailyRun = false;
+        }
+
         ServiceLocator.Sound?.Play(SoundEvent.WIN);
         HapticManager.Win();
-        // TODO: PanelRouter.Show("LevelComplete", result) → confetti + star sequence (spec §9.6).
+
+        var sheet = FindAnyObjectByType<LevelCompleteView>(FindObjectsInactive.Include);
+        ServiceLocator.Router?.Show(Routes.LevelComplete);
+        sheet?.Open(result, isNewBest);
     }
 
     // ─── helpers ───────────────────────────────────────────────────────────

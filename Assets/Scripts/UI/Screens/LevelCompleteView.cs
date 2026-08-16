@@ -8,6 +8,8 @@ public class LevelCompleteView : MonoBehaviour {
     [SerializeField] GameObject[] starSlots;     // 3 star icons, initially hidden
     [SerializeField] TMP_Text xpText, timeText, headerText;
     [SerializeField] Button nextBtn, replayBtn, topicsBtn;
+    [SerializeField] GameObject newBestBadge;    // "NEW BEST!" pill, hidden by default
+    [SerializeField] ConfettiRain confetti;
 
     LevelResult result;
 
@@ -23,14 +25,38 @@ public class LevelCompleteView : MonoBehaviour {
         if (topicsBtn != null) topicsBtn.onClick.RemoveListener(OnTopics);
     }
 
-    public void Open(LevelResult r) {
+    public void Open(LevelResult r, bool isNewBest = false) {
         result = r;
         if (starSlots != null) foreach (var s in starSlots) if (s != null) s.SetActive(false);
 
-        if (headerText != null) headerText.text = "Level Complete!";
-        if (xpText     != null) xpText.text     = $"+{r.xpEarned} XP";
-        if (timeText   != null) timeText.text   = $"{r.timeSeconds / 60:00}:{r.timeSeconds % 60:00}";
+        if (headerText != null) {
+            headerText.text = "Level Complete!";
+            // Bouncy header entrance.
+            headerText.transform.localScale = Vector3.zero;
+            headerText.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack, 2.2f);
+        }
+        if (xpText   != null) xpText.text   = $"+{r.xpEarned} XP";
+        if (timeText != null) timeText.text = $"{r.timeSeconds / 60:00}:{r.timeSeconds % 60:00}";
 
+        // Next hides on the last level of a topic.
+        if (nextBtn != null) nextBtn.gameObject.SetActive(r.levelId < AppConfig.LevelsPerTopic);
+
+        // High-score celebration: badge stamps in after the stars land.
+        if (newBestBadge != null) {
+            newBestBadge.SetActive(false);
+            if (isNewBest) {
+                DOVirtual.DelayedCall(0.75f, () => {
+                    if (newBestBadge == null || !gameObject.activeInHierarchy) return;
+                    newBestBadge.SetActive(true);
+                    newBestBadge.transform.localScale = Vector3.one * 2.2f;
+                    newBestBadge.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack, 2.5f);
+                    ServiceLocator.Sound?.Play(SoundEvent.UNLOCK);
+                    HapticManager.Success();
+                });
+            }
+        }
+
+        confetti?.Play();
         PlayStarSequence(r.stars);
     }
 

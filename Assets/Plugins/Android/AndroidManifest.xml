@@ -3,14 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.VIBRATE" />
     <application android:allowBackup="true" tools:replace="android:allowBackup">
-        <activity android:name="com.unity3d.player.UnityPlayerActivity"
-                  android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|smallestScreenSize|uiMode"
+        <!-- Unity 6 entry point is GameActivity (Player Settings → Application
+             Entry Point). The activity class and theme below MUST match that
+             setting — pointing the launcher at the classic UnityPlayerActivity
+             produces an APK whose icon never appears. -->
+        <activity android:name="com.unity3d.player.UnityPlayerGameActivity"
+                  android:theme="@style/BaseUnityGameActivityTheme"
+                  android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|smallestScreenSize|uiMode|density"
                   android:screenOrientation="fullSensor"
                   android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
+            <meta-data android:name="android.app.lib_name" android:value="game" />
         </activity>
     </application>
 </manifest>

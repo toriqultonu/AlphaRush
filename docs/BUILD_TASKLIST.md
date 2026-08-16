@@ -147,7 +147,7 @@ Create Assets/Scripts/Constants/ files per docs/UNITY_PORT_GUIDE.md §3 and docs
 
 - AppColors.cs (full palette + HighlightColors[] per port guide §3.1 — uses UnityEngine.Color)
 - AppConfig.cs (per port guide §3.2)
-- AppDimensions.cs (per port guide §3.3)
+- AppDimensions.cs (per port guide §3.3)https://meet.google.com/nnw-fkfj-sao
 - AppStrings.cs (just create a placeholder static class with const string AppName = "AlphaRush" and const string Tagline = "Find words. Beat the clock. Climb the alphabet." — we'll expand as screens need text)
 
 These can reference UnityEngine.

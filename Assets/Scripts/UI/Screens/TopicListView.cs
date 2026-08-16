@@ -30,6 +30,15 @@ public class TopicListView : MonoBehaviour {
         foreach (var t in topics) {
             var card     = Instantiate(cardPrefab, gridContainer);
             bool unlocked = progress?.unlockedTopicIds?.Contains(t.id) ?? false;
+            // Star-threshold unlock (spec §7.3): promote once cumulative stars suffice.
+            if (!unlocked && progress != null && progress.totalStars >= t.unlockStarsRequired) {
+                unlocked = true;
+                progress.unlockedTopicIds ??= new List<string>();
+                if (!progress.unlockedTopicIds.Contains(t.id)) {
+                    progress.unlockedTopicIds.Add(t.id);
+                    ServiceLocator.Progress?.Save(progress);
+                }
+            }
             int starsInTopic = CountStarsForTopic(progress, t.id);
             card.Bind(t, unlocked, progress?.totalStars ?? 0, starsInTopic);
             string capturedId = t.id;

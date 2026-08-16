@@ -54,7 +54,8 @@ public class DailyChallengeView : MonoBehaviour {
     void OnPlay() {
         if (current == null) return;
         ServiceLocator.Sound?.Play(SoundEvent.BUTTON);
-        // Use level id 1 as the playable surface. GameView ignores daily-specific scoring.
+        // Use level id 1 as the playable surface; flag the run so GameView credits the streak.
+        GameView.NextOpenIsDaily = true;
         ServiceLocator.Router?.Show(Routes.Game);
         FindAnyObjectByType<GameView>(FindObjectsInactive.Include)?.Open(current.topicId, 1);
     }

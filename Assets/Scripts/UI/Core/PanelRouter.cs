@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using DG.Tweening;
 
 // Inspector-wired panel switcher. Parallel arrays: mainPanels[i] is shown when
 // Show(panelNames[i]) is called; all others are hidden. Registers itself to
@@ -47,7 +48,27 @@ public class PanelRouter : MonoBehaviour {
             if (mainPanels[i] != null) mainPanels[i].SetActive(i == match);
         }
 
+        AnimateIn(mainPanels[match]);
+
         Current = panelName;
         OnPanelChanged?.Invoke(panelName);
+    }
+
+    // Candy-style pop: fade + overshoot scale on every panel entrance.
+    static void AnimateIn(GameObject panel) {
+        if (panel == null) return;
+        if (ServiceLocator.Settings?.Load()?.reduceMotion ?? false) return;
+
+        var t = panel.transform;
+        t.DOKill();
+        t.localScale = Vector3.one * 0.94f;
+        t.DOScale(1f, 0.28f).SetEase(Ease.OutBack, 2.2f);
+
+        var cg = panel.GetComponent<CanvasGroup>();
+        if (cg != null) {
+            cg.DOKill();
+            cg.alpha = 0f;
+            cg.DOFade(1f, 0.2f);
+        }
     }
 }
